@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="대시보드">
+  <script type="module" src="/src/pages/dashboard.js"></script>
+  <title>대시보드 | SafeMeal</title>
+</head>
+
+<body data-page="dashboard">
+  <header class="topbar">
+    <a href="/dashboard.html" class="brand">
+      <span class="brand-mark">잎</span>
+      <span><strong>세이프밀</strong><small>SAFE MEAL</small></span>
+    </a>
+    <nav class="desktop-nav" aria-label="주요 메뉴">
+      <a href="/dashboard.html" data-nav="dashboard">▦ 대시보드</a>
+      <a href="/upload.html" data-nav="upload">ⓘ 업로드</a>
+      <a href="/history.html" data-nav="history">◷ 식사 기록</a>
+      <a href="/admin.html" data-nav="admin" data-admin-only hidden>▤ 관리자</a>
+    </nav>
+    <div class="account">
+      <span data-user-name></span>
+      <button type="button" data-logout>로그아웃</button>
+    </div>
+  </header>
+
+  <main class="page">
+    <div id="dashboard-loading" class="state" role="status" aria-live="polite">
+      <span class="spinner"></span>
+      <strong>오늘의 급식 정보를 준비하고 있습니다.</strong>
+    </div>
+
+    <div id="dashboard-content" hidden>
+      <section class="hero">
+        <div class="hero-copy">
+          <span class="eyebrow">오늘의 스마트 배식</span>
+          <h1>내게 맞는 만큼,<br>기분 좋은 한 끼</h1>
+          <p id="today-date"></p>
+          <a href="/upload.html" class="btn hero-btn">업로드하기 →</a>
+        </div>
+
+        <div class="today-card">
+          <div class="section-title">
+            <div>
+              <small>TODAY'S MEAL</small>
+              <h2>오늘의 급식</h2>
+            </div>
+            <span id="today-meal-context"></span>
+          </div>
+          <ul id="today-menu-list"></ul>
+        </div>
+      </section>
+
+      <div class="grid gap-4 mt-4 lg:grid-cols-2">
+        <section class="panel">
+          <div class="section-title">
+            <div>
+              <small>NEXT SERVING</small>
+              <h2>오늘의 권장 배식량</h2>
+            </div>
+            <span>신체 정보와 권장 영양소 기반</span>
+          </div>
+          <div id="recommendation-list" class="rows"></div>
+        </section>
+
+        <section class="panel">
+          <div class="section-title">
+            <div>
+              <small>RECENT MEALS</small>
+              <h2>최근 식사 기록</h2>
+            </div>
+            <a href="/history.html">전체 보기 ›</a>
+          </div>
+          <p id="recent-period" class="table-note"></p>
+          <div id="recent-meals" class="rows"></div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <nav class="mobile-nav" aria-label="모바일 주요 메뉴">
+    <a href="/dashboard.html" data-nav="dashboard">▦<span>대시보드</span></a>
+    <a href="/upload.html" data-nav="upload">ⓘ<span>업로드</span></a>
+    <a href="/history.html" data-nav="history">◷<span>식사 기록</span></a>
+  </nav>
+
+</body>
+
+</html>

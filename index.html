@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="SafeMeal 로그인">
+  <title>로그인 | SafeMeal</title>
+  <script type="module" src="/src/pages/login.js"></script>
+</head>
+
+<body data-page="login" class="login-body">
+  <main class="login-layout">
+    <section class="login-brand-panel">
+      <a href="/index.html" class="brand login-brand"><span
+          class="brand-mark">잎</span><span><strong>세이프밀</strong><small>SAFE MEAL</small></span></a>
+      <div><span class="eyebrow">SMART MEAL SERVICE</span>
+        <h1>내게 맞는 만큼,<br>기분 좋은 한 끼</h1>
+        <p>식사 분석과 배식량 추천을 한 곳에서 확인하세요.</p>
+      </div>
+      <small>로컬 프론트엔드 데모</small>
+    </section>
+    <section class="login-form-panel">
+      <form id="login-form" class="login-form">
+        <div><span class="eyebrow">WELCOME</span>
+          <h2>로그인</h2>
+          <p>학생 또는 관리자 계정으로 계속하세요.</p>
+        </div>
+        <label class="field"><span>로그인 아이디</span><input name="loginId" type="text" autocomplete="username"
+            placeholder="로그인 아이디 입력" required></label>
+        <label class="field"><span>비밀번호</span><input name="password" type="password" autocomplete="current-password"
+            minlength="8" placeholder="비밀번호 입력" required></label>
+        <p id="login-message" class="field-error" role="alert"></p>
+        <button type="submit" class="btn primary login-submit">로그인</button>
+        <div class="demo-accounts"><span>빠른 데모 입력 · 비밀번호 Password123!</span>
+          <div><button type="button" class="btn secondary small" data-demo-account="user">학생 student01</button><button
+              type="button" class="btn secondary small" data-demo-account="admin">관리자 admin01</button></div>
+        </div>
+      </form>
+    </section>
+  </main>
+</body>
+
+</html>

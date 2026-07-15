@@ -3,6 +3,9 @@ import { clearUser, debugLog, readUser, saveUser } from "../common.js";
 
 const form = document.querySelector("#login-form");
 const message = document.querySelector("#login-message");
+const loginButton = form.querySelector('[data-auth-action="login"]');
+const signupButton = form.querySelector('[data-auth-action="signup"]');
+const signupFields = document.querySelector("#signup-fields");
 
 init();
 
@@ -31,16 +34,22 @@ async function init() {
   });
 
   form.addEventListener("submit", handleSubmit);
+  signupButton.addEventListener("click", handleSignupClick);
+  signupFields.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    signupButton.click();
+  });
 }
 
 async function handleSubmit(event) {
   event.preventDefault();
+  if (!form.reportValidity()) return;
+
   const loginId = form.elements.loginId.value.trim();
   debugLog("LOGIN", "로그인 제출", { loginId });
-  const submit = form.querySelector('button[type="submit"]');
-  submit.disabled = true;
-  submit.textContent = "로그인 중...";
-  message.textContent = "";
+  setBusy(true, "login");
+  setMessage();
 
   try {
     const result = await api.login({
@@ -53,11 +62,80 @@ async function handleSubmit(event) {
     redirectAfterLogin(user);
   } catch (error) {
     debugLog("LOGIN", "로그인 실패", { loginId, message: error.message });
-    message.textContent = error.message || "로그인하지 못했습니다.";
+    setMessage(error.message || "로그인하지 못했습니다.", "error");
   } finally {
-    submit.disabled = false;
-    submit.textContent = "로그인";
+    setBusy(false);
   }
+}
+
+async function handleSignupClick() {
+  if (signupFields.hidden) {
+    signupFields.hidden = false;
+    signupButton.setAttribute("aria-expanded", "true");
+    form.elements.password.autocomplete = "new-password";
+    setMessage("이름과 학번을 입력한 뒤 회원가입 버튼을 다시 눌러 주세요.", "hint");
+    form.elements.name.focus();
+    return;
+  }
+
+  if (!form.reportValidity()) return;
+
+  const loginId = form.elements.loginId.value.trim();
+  const password = form.elements.password.value;
+  const name = form.elements.name.value.trim();
+  const studentNumber = form.elements.studentNumber.value.trim();
+  const missingField = [
+    [name, form.elements.name, "이름을 입력해 주세요."],
+    [studentNumber, form.elements.studentNumber, "학번을 입력해 주세요."],
+  ].find(([value]) => !value);
+
+  if (missingField) {
+    const [, input, errorMessage] = missingField;
+    setMessage(errorMessage, "error");
+    input.focus();
+    return;
+  }
+
+  debugLog("SIGNUP", "회원가입 제출", { loginId, studentNumber });
+  setBusy(true, "signup");
+  setMessage();
+  let signupCompleted = false;
+
+  try {
+    const registeredUser = await api.signup({
+      loginId,
+      password,
+      name,
+      studentNumber,
+      allergenCodes: [],
+    });
+    signupCompleted = true;
+    await api.login({ loginId, password });
+    const user = registeredUser?.role ? registeredUser : await api.getCurrentUser();
+    saveUser(user);
+    debugLog("SIGNUP", "회원가입 및 자동 로그인 성공", { userId: user.id, role: user.role });
+    redirectAfterLogin(user);
+  } catch (error) {
+    debugLog("SIGNUP", "회원가입 처리 실패", { loginId, signupCompleted, message: error.message });
+    const errorMessage = signupCompleted
+      ? `회원가입은 완료됐지만 자동 로그인에 실패했습니다. 로그인 버튼을 눌러 주세요. ${error.message || ""}`.trim()
+      : error.message || "회원가입하지 못했습니다.";
+    setMessage(errorMessage, "error");
+  } finally {
+    setBusy(false);
+  }
+}
+
+function setBusy(isBusy, action = "") {
+  loginButton.disabled = isBusy;
+  signupButton.disabled = isBusy;
+  loginButton.textContent = isBusy && action === "login" ? "로그인 중..." : "로그인";
+  signupButton.textContent = isBusy && action === "signup" ? "가입 중..." : "회원가입";
+}
+
+function setMessage(text = "", type = "") {
+  message.textContent = text;
+  message.dataset.type = type;
 }
 
 function redirectAfterLogin(user) {

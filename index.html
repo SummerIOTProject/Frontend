@@ -30,8 +30,18 @@
             placeholder="로그인 아이디 입력" required></label>
         <label class="field"><span>비밀번호</span><input name="password" type="password" autocomplete="current-password"
             minlength="8" placeholder="비밀번호 입력" required></label>
+        <div id="signup-fields" class="signup-fields" hidden>
+          <label class="field"><span>이름</span><input name="name" type="text" autocomplete="name"
+              placeholder="이름 입력"></label>
+          <label class="field"><span>학번</span><input name="studentNumber" type="text" autocomplete="off"
+              placeholder="학번 입력"></label>
+        </div>
         <p id="login-message" class="field-error" role="alert"></p>
-        <button type="submit" class="btn primary login-submit">로그인</button>
+        <div class="login-actions">
+          <button type="submit" class="btn primary" data-auth-action="login">로그인</button>
+          <button type="button" class="btn secondary" data-auth-action="signup" aria-controls="signup-fields"
+              aria-expanded="false">회원가입</button>
+        </div>
         <div class="demo-accounts"><span>빠른 데모 입력 · 비밀번호 Password123!</span>
           <div><button type="button" class="btn secondary small" data-demo-account="user">학생 student01</button><button
               type="button" class="btn secondary small" data-demo-account="admin">관리자 admin01</button></div>

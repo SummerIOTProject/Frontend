@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [tailwindcss()],
   appType: "mpa",
   server: {
-    port: 3000,
+    port: 5174,
     proxy: {
       "/backend": {
         target: "https://backend-five-kohl-41.vercel.app",
@@ -15,7 +15,7 @@ export default defineConfig({
       },
     },
   },
-  preview: { port: 3000 },
+  preview: { port: 5174 },
   build: {
     emptyOutDir: true,
     rolldownOptions: {

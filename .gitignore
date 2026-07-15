@@ -1,19 +1,44 @@
+# Dependencies
 node_modules/
+
+# Build and test output
 dist/
+dist-ssr/
 coverage/
 .vite/
+.vitest/
 .vercel/
+*.tsbuildinfo
 
+# Environment variables and local configuration
 .env*
-!.env.example
-!.env.development.example
-!.env.production
+*.local
+.gitignore
 
-backend/
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor and IDE files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Local tooling and documentation
 .agents/
 .codex/
 .openai/
+DEVELOPMENT.md
 
-*.log
+# Operating system files
 .DS_Store
 Thumbs.db
+Desktop.ini

@@ -35,7 +35,7 @@ export const endpoints = {
   leftoverSummary: `${API_PREFIX}/admin/leftover-summary`,
 };
 
-export const BACKEND_ORIGIN = "https://backend-five-kohl-41.vercel.app";
+export const BACKEND_ORIGIN = (import.meta.env.VITE_BACKEND_ORIGIN?.trim() || "").replace(/\/$/, "");
 export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL?.trim() || "/backend").replace(/\/$/, "");
 const baseUrl = API_BASE_URL;
 const AUTH_KEY = "smartMealAuth";

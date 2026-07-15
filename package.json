@@ -1,9 +1,9 @@
 {
-  "name": "smart-meal-vanilla-web",
+  "name": "SafeMeal",
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": "22.x"
+    "node": "24.x"
   },
   "scripts": {
     "dev": "vite --host localhost",
@@ -13,14 +13,11 @@
     "test:watch": "vitest"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.2.1",
+    "@tailwindcss/vite": "^4.3.2",
     "jsdom": "^29.1.1",
-    "tailwindcss": "4.2.1",
+    "tailwindcss": "4.3.2",
     "vite": "^8.1.4",
     "vitest": "^4.1.10"
   },
-  "type": "module",
-  "dependencies": {
-    "vercel": "^54.17.3"
-  }
+  "type": "module"
 }

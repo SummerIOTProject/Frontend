@@ -19,7 +19,9 @@ if (user) {
 function initAdmin() {
   const dateForm = document.querySelector("#admin-date-form");
   const summaryForm = document.querySelector("#summary-filter");
+  const summaryPagination = document.querySelector("#summary-pagination");
   const mealScheduleForm = document.querySelector("#meal-schedule-form");
+  const newMenuDisclosure = document.querySelector("#new-menu-disclosure");
   const mealMenuSelect = document.querySelector("#meal-menu-select");
   const addMealMenuButton = document.querySelector("#add-meal-menu");
   const addNewMealMenuButton = document.querySelector("#add-new-meal-menu");
@@ -28,11 +30,17 @@ function initAdmin() {
   const menuForm = document.querySelector("#menu-form");
   const searchForm = document.querySelector("#menu-search-form");
   const menuList = document.querySelector("#admin-menu-list");
+  const menuPagination = document.querySelector("#menu-pagination");
   const cancelMenuEditButton = document.querySelector("#cancel-menu-edit");
   const selectedMealMenus = new Map();
   let availableMenus = [];
+  let summaryItems = [];
+  let summaryPage = 1;
+  let menuPage = 1;
   let draftMenuSequence = 0;
   let mealRegistrationBusy = false;
+  const summaryPageSize = 10;
+  const menuPageSize = 10;
   const today = toLocalDateInput(new Date());
   const monthStart = `${today.slice(0, 8)}01`;
 
@@ -55,6 +63,7 @@ function initAdmin() {
       return;
     }
     summaryForm.endDate.setCustomValidity("");
+    summaryPage = 1;
     debugLog("ADMIN", "메뉴 통계 기간 조회 제출", { startDate: summaryForm.startDate.value, endDate: summaryForm.endDate.value });
     loadSummary();
   });
@@ -62,6 +71,7 @@ function initAdmin() {
   searchForm.addEventListener("submit", (event) => {
     event.preventDefault();
     debugLog("ADMIN", "메뉴 검색 제출", { keyword: searchForm.keyword.value.trim() });
+    menuPage = 1;
     loadMenus();
   });
   mealScheduleForm.addEventListener("submit", submitMealSchedule);
@@ -72,6 +82,8 @@ function initAdmin() {
   menuForm.addEventListener("submit", submitMenu);
   cancelMenuEditButton.addEventListener("click", cancelMenuEdit);
   menuList.addEventListener("click", beginMenuEdit);
+  summaryPagination.addEventListener("click", changeSummaryPage);
+  menuPagination.addEventListener("click", changeMenuPage);
 
   const allergenLoadPromise = loadAllergens();
   Promise.all([loadDashboard(), loadSummary(), allergenLoadPromise, loadMenus(), loadMealMenuOptions()]);
@@ -97,19 +109,55 @@ function initAdmin() {
     debugLog("ADMIN", "메뉴별 잔반 통계 조회 시작", { startDate: summaryForm.startDate.value, endDate: summaryForm.endDate.value });
     const body = document.querySelector("#menu-statistics");
     body.innerHTML = '<tr><td colspan="4">통계를 불러오는 중입니다.</td></tr>';
+    summaryPagination.querySelectorAll("button").forEach((button) => { button.disabled = true; });
     try {
       const data = await api.getLeftoverSummary({
         startDate: summaryForm.startDate.value,
         endDate: summaryForm.endDate.value,
       });
-      body.innerHTML = data.menuSummary.length
-        ? data.menuSummary.map(summaryRow).join("")
-        : '<tr><td colspan="4">선택한 기간의 집계 데이터가 없습니다.</td></tr>';
-      debugLog("ADMIN", "메뉴별 잔반 통계 조회 완료", { count: data.menuSummary.length });
+      summaryItems = data.menuSummary;
+      renderSummaryPage();
+      debugLog("ADMIN", "메뉴별 잔반 통계 조회 완료", { count: summaryItems.length });
     } catch (error) {
+      summaryItems = [];
       debugLog("ADMIN", "메뉴별 잔반 통계 조회 실패", { message: error.message });
       body.innerHTML = `<tr><td colspan="4">${escapeHtml(error.message)}</td></tr>`;
+      summaryPagination.innerHTML = '<span class="pagination-summary">통계 페이지를 불러오지 못했습니다.</span>';
     }
+  }
+
+  function changeSummaryPage(event) {
+    const button = event.target.closest("[data-summary-page]");
+    if (!button || button.disabled) return;
+    const page = Number(button.dataset.summaryPage);
+    if (!Number.isInteger(page) || page < 1 || page === summaryPage) return;
+    summaryPage = page;
+    renderSummaryPage();
+  }
+
+  function renderSummaryPage() {
+    const body = document.querySelector("#menu-statistics");
+    const totalPages = Math.max(1, Math.ceil(summaryItems.length / summaryPageSize));
+    summaryPage = Math.min(summaryPage, totalPages);
+    const start = (summaryPage - 1) * summaryPageSize;
+    const visibleItems = summaryItems.slice(start, start + summaryPageSize);
+    body.innerHTML = visibleItems.length
+      ? visibleItems.map(summaryRow).join("")
+      : '<tr><td colspan="4">선택한 기간의 집계 데이터가 없습니다.</td></tr>';
+    renderSummaryPagination(totalPages);
+  }
+
+  function renderSummaryPagination(totalPages) {
+    const pageItems = paginationItems(summaryPage, totalPages);
+    summaryPagination.innerHTML = `
+      <button type="button" class="pagination-button" data-summary-page="${summaryPage - 1}"${summaryPage === 1 ? " disabled" : ""}>이전</button>
+      <span class="pagination-pages">
+        ${pageItems.map((page) => page === null
+          ? '<span class="pagination-ellipsis" aria-hidden="true">…</span>'
+          : `<button type="button" class="pagination-button${page === summaryPage ? " active" : ""}" data-summary-page="${page}"${page === summaryPage ? ' aria-current="page"' : ""}>${page}</button>`).join("")}
+      </span>
+      <button type="button" class="pagination-button" data-summary-page="${summaryPage + 1}"${summaryPage === totalPages ? " disabled" : ""}>다음</button>
+      <span class="pagination-summary">${summaryPage} / ${totalPages} 페이지 · 총 ${formatNumber(summaryItems.length)}개</span>`;
   }
 
   async function loadAllergens() {
@@ -134,20 +182,52 @@ function initAdmin() {
   }
 
   async function loadMenus() {
-    debugLog("ADMIN", "메뉴 목록 조회 시작", { keyword: searchForm.keyword.value.trim() });
+    const keyword = searchForm.keyword.value.trim();
+    debugLog("ADMIN", "메뉴 목록 조회 시작", { page: menuPage, size: menuPageSize, keyword });
     const body = document.querySelector("#admin-menu-list");
     body.innerHTML = '<tr><td colspan="5">메뉴를 불러오는 중입니다.</td></tr>';
+    menuPagination.querySelectorAll("button").forEach((button) => { button.disabled = true; });
     try {
-      const data = await api.getMenus({ page: 1, size: 100, keyword: searchForm.keyword.value.trim() });
+      const data = await api.getMenus({ page: menuPage, size: menuPageSize, keyword });
+      const totalPages = Math.max(1, Math.ceil(data.totalCount / menuPageSize));
+      if (menuPage > totalPages) {
+        menuPage = totalPages;
+        await loadMenus();
+        return;
+      }
       text("menu-total-count", `${formatNumber(data.totalCount)}개`);
       body.innerHTML = data.items.length
         ? data.items.map(menuRow).join("")
         : '<tr><td colspan="5">검색 결과가 없습니다.</td></tr>';
-      debugLog("ADMIN", "메뉴 목록 조회 완료", { count: data.items.length, totalCount: data.totalCount });
+      renderMenuPagination(totalPages, data.totalCount);
+      debugLog("ADMIN", "메뉴 목록 조회 완료", { page: menuPage, totalPages, count: data.items.length, totalCount: data.totalCount });
     } catch (error) {
       debugLog("ADMIN", "메뉴 목록 조회 실패", { message: error.message });
       body.innerHTML = `<tr><td colspan="5">${escapeHtml(error.message)}</td></tr>`;
+      menuPagination.innerHTML = '<span class="pagination-summary">메뉴 페이지를 불러오지 못했습니다.</span>';
     }
+  }
+
+  function changeMenuPage(event) {
+    const button = event.target.closest("[data-menu-page]");
+    if (!button || button.disabled) return;
+    const page = Number(button.dataset.menuPage);
+    if (!Number.isInteger(page) || page < 1 || page === menuPage) return;
+    menuPage = page;
+    loadMenus();
+  }
+
+  function renderMenuPagination(totalPages, totalCount) {
+    const pageItems = paginationItems(menuPage, totalPages);
+    menuPagination.innerHTML = `
+      <button type="button" class="pagination-button" data-menu-page="${menuPage - 1}"${menuPage === 1 ? " disabled" : ""}>이전</button>
+      <span class="pagination-pages">
+        ${pageItems.map((page) => page === null
+          ? '<span class="pagination-ellipsis" aria-hidden="true">…</span>'
+          : `<button type="button" class="pagination-button${page === menuPage ? " active" : ""}" data-menu-page="${page}"${page === menuPage ? ' aria-current="page"' : ""}>${page}</button>`).join("")}
+      </span>
+      <button type="button" class="pagination-button" data-menu-page="${menuPage + 1}"${menuPage === totalPages ? " disabled" : ""}>다음</button>
+      <span class="pagination-summary">${menuPage} / ${totalPages} 페이지 · 총 ${formatNumber(totalCount)}개</span>`;
   }
 
   async function loadMealMenuOptions() {
@@ -200,6 +280,7 @@ function initAdmin() {
   }
 
   function addNewMealMenuDraft() {
+    newMenuDisclosure.open = true;
     const menu = readNewMenuDraft();
     if (!menu) return false;
 
@@ -225,6 +306,7 @@ function initAdmin() {
       menu,
     });
     resetNewMenuDraft();
+    newMenuDisclosure.open = false;
     text("new-menu-draft-message", `${menu.name} 메뉴 초안을 식단에 추가했습니다.`);
     text("meal-schedule-message", "새 메뉴는 아래 최종 등록 버튼을 누를 때 생성됩니다.");
     debugLog("ADMIN", "새 메뉴 초안 식단 추가", { key, name: menu.name, selectedCount: selectedMealMenus.size });
@@ -499,13 +581,29 @@ function initAdmin() {
   }
 }
 
+function paginationItems(currentPage, totalPages) {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, index) => index + 1);
+  }
+
+  const items = [1];
+  const start = Math.max(2, currentPage - 1);
+  const end = Math.min(totalPages - 1, currentPage + 1);
+  if (start > 2) items.push(null);
+  for (let page = start; page <= end; page += 1) items.push(page);
+  if (end < totalPages - 1) items.push(null);
+  items.push(totalPages);
+  return items;
+}
+
 function summaryRow(item) {
   const consumed = formatPercentRatio(item.averageConsumedRatio);
   const leftover = formatPercentRatio(item.averageLeftoverRatio);
+  const tone = consumptionTone(item.averageConsumedRatio);
   return `<tr>
     <td><strong>${escapeHtml(item.menuName)}</strong></td>
     <td>${formatNumber(item.analysisCount)}회</td>
-    <td><span class="table-bar"><i style="width:${ratioWidth(item.averageConsumedRatio)}%"></i></span><b>${consumed}</b></td>
+    <td><span class="table-bar"><i class="consumption-${tone}" style="width:${ratioWidth(item.averageConsumedRatio)}%"></i></span><b>${consumed}</b></td>
     <td><b>${leftover}</b></td>
   </tr>`;
 }
@@ -578,6 +676,14 @@ function formatNumber(value) {
 function ratioWidth(value) {
   const ratio = Number(value);
   return Number.isFinite(ratio) ? Math.min(100, Math.max(0, ratio * 100)) : 0;
+}
+
+function consumptionTone(value) {
+  const ratio = Number(value);
+  if (!Number.isFinite(ratio)) return "neutral";
+  if (ratio >= .8) return "high";
+  if (ratio >= .5) return "medium";
+  return "low";
 }
 
 function toLocalDateInput(date) {

@@ -4,22 +4,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/src/styles.css">
   <meta name="description" content="대시보드">
-  <script type="module" src="/src/pages/dashboard.js"></script>
   <title>대시보드 | SafeMeal</title>
 </head>
 
 <body data-page="dashboard">
   <header class="topbar">
     <a href="/dashboard.html" class="brand">
-      <span class="brand-mark">잎</span>
+      <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32" focusable="false"><path d="M6 14.5h20c0 6.2-4.5 10.5-10 10.5S6 20.7 6 14.5Z"/><path d="M9.5 27h13M10.5 10.5c0-2 1.2-3.3 2.7-4.8M17 10.5c0-2.2 1.5-3.5 3.1-5.2M23 10.5c0-1.5.8-2.6 1.8-3.7"/></svg></span>
       <span><strong>세이프밀</strong><small>SAFE MEAL</small></span>
     </a>
     <nav class="desktop-nav" aria-label="주요 메뉴">
-      <a href="/dashboard.html" data-nav="dashboard">▦ 대시보드</a>
-      <a href="/upload.html" data-nav="upload">ⓘ 업로드</a>
-      <a href="/history.html" data-nav="history">◷ 식사 기록</a>
-      <a href="/admin.html" data-nav="admin" data-admin-only hidden>▤ 관리자</a>
+      <a href="/dashboard.html" data-nav="dashboard">대시보드</a>
+      <a href="/menu.html" data-nav="menu">급식 메뉴</a>
+      <a href="/upload.html" data-nav="upload">업로드</a>
+      <a href="/history.html" data-nav="history">식사 기록</a>
+      <a href="/admin.html" data-nav="admin" data-admin-only hidden>관리자</a>
     </nav>
     <div class="account">
       <span data-user-name></span>
@@ -82,11 +83,13 @@
   </main>
 
   <nav class="mobile-nav" aria-label="모바일 주요 메뉴">
-    <a href="/dashboard.html" data-nav="dashboard">▦<span>대시보드</span></a>
-    <a href="/upload.html" data-nav="upload">ⓘ<span>업로드</span></a>
-    <a href="/history.html" data-nav="history">◷<span>식사 기록</span></a>
+    <a href="/dashboard.html" data-nav="dashboard">대시보드</a>
+    <a href="/menu.html" data-nav="menu">급식 메뉴</a>
+    <a href="/upload.html" data-nav="upload">업로드</a>
+    <a href="/history.html" data-nav="history">식사 기록</a>
   </nav>
 
+  <script type="module" src="/src/pages/dashboard.js"></script>
 </body>
 
 </html>

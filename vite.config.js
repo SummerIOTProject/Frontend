@@ -26,6 +26,7 @@ export default defineConfig(({ mode }) => {
         input: {
           login: resolve(import.meta.dirname, "index.html"),
           dashboard: resolve(import.meta.dirname, "dashboard.html"),
+          menu: resolve(import.meta.dirname, "menu.html"),
           upload: resolve(import.meta.dirname, "upload.html"),
           history: resolve(import.meta.dirname, "history.html"),
           meal: resolve(import.meta.dirname, "meal.html"),

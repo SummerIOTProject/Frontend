@@ -1,4 +1,3 @@
-import "./styles.css";
 import { api } from "./api.js";
 
 const USER_KEY = "smartMealCurrentUser";

@@ -38,6 +38,28 @@ export const endpoints = {
 const DEFAULT_BACKEND_ORIGIN = "https://backend-five-kohl-41.vercel.app";
 const configuredBackendOrigin = import.meta.env.VITE_BACKEND_ORIGIN?.trim();
 
+const ALLERGEN_NAMES = Object.freeze({
+  EGGS: "난류",
+  MILK: "우유",
+  BUCKWHEAT: "메밀",
+  PEANUT: "땅콩",
+  SOYBEAN: "대두",
+  WHEAT: "밀",
+  MACKEREL: "고등어",
+  CRAB: "게",
+  SHRIMP: "새우",
+  PORK: "돼지고기",
+  PEACH: "복숭아",
+  TOMATO: "토마토",
+  SULFITES: "아황산류",
+  WALNUT: "호두",
+  CHICKEN: "닭고기",
+  BEEF: "쇠고기",
+  SQUID: "오징어",
+  SHELLFISH: "조개류",
+  PINE_NUT: "잣",
+});
+
 export const BACKEND_ORIGIN = (
   import.meta.env.PROD ? DEFAULT_BACKEND_ORIGIN : configuredBackendOrigin || DEFAULT_BACKEND_ORIGIN
 ).replace(/\/$/, "");
@@ -340,8 +362,9 @@ export const api = {
 
   async getTodayMeal(mealType = "LUNCH") {
     apiLog("오늘 급식 조회", { mealType });
-    const data = await requestApi(endpoints.todayMeal, { auth: false });
-    const meal = (data.items || []).find((item) => item.meal_type === mealType);
+    const data = await requestApi(`${endpoints.todayMeal}${buildQuery({ meal_type: mealType })}`, { auth: false });
+    const meals = Array.isArray(data?.items) ? data.items : data ? [data] : [];
+    const meal = meals.find((item) => item.meal_type === mealType);
     if (!meal) {
       throw new ApiError(`오늘 ${mealType === "LUNCH" ? "점심" : "급식"} 정보가 없습니다.`, {
         status: 404,
@@ -349,6 +372,42 @@ export const api = {
       });
     }
     return adaptMeal(meal);
+  },
+
+  async getMealForDate(date, mealType = "LUNCH") {
+    apiLog("날짜별 급식 조회", { date, mealType });
+    const data = await requestApi(`${endpoints.todayMeal}${buildQuery({ date, meal_type: mealType })}`, { auth: false });
+    const meals = Array.isArray(data?.items) ? data.items : data ? [data] : [];
+    const source = meals.find((item) => item.meal_type === mealType);
+    if (!source) return { requestedDate: date, meal: null, mismatchedDate: false };
+    if (source.meal_date !== date) {
+      return { requestedDate: date, responseDate: source.meal_date, meal: null, mismatchedDate: true };
+    }
+    return { requestedDate: date, responseDate: source.meal_date, meal: adaptMeal(source), mismatchedDate: false };
+  },
+
+  async getMealsForWeek({ dates, mealType = "LUNCH" }) {
+    const requestedDates = [...new Set((dates || []).filter(Boolean))].slice(0, 7);
+    apiLog("주간 급식 일자별 조회", { dates: requestedDates, mealType, requestCount: requestedDates.length });
+    const outcomes = await Promise.all(requestedDates.map(async (date) => {
+      try {
+        return await this.getMealForDate(date, mealType);
+      } catch (error) {
+        if (error instanceof ApiError && error.status === 404) {
+          return { requestedDate: date, meal: null, mismatchedDate: false, notFound: true };
+        }
+        return { requestedDate: date, meal: null, mismatchedDate: false, error };
+      }
+    }));
+    const failures = outcomes.filter((outcome) => outcome.error);
+    if (failures.length === requestedDates.length && failures[0]?.error) throw failures[0].error;
+    return {
+      meals: outcomes.map((outcome) => outcome.meal).filter(Boolean),
+      coverage: "DAILY_REQUESTS",
+      requestedCount: requestedDates.length,
+      mismatchCount: outcomes.filter((outcome) => outcome.mismatchedDate).length,
+      failureCount: failures.length,
+    };
   },
 
   async getDashboard() {
@@ -472,7 +531,8 @@ export const api = {
       start_date: startDate,
       end_date: endDate,
     })}`);
-    return { menuSummary: (Array.isArray(data) ? data : []).map(adaptLeftoverSummaryItem) };
+    const source = Array.isArray(data) ? data : data?.menu_summary || data?.items || [];
+    return { menuSummary: source.map(adaptLeftoverSummaryItem) };
   },
 
   async getMenus({ page = 1, size = 20, keyword = "" } = {}) {
@@ -549,13 +609,15 @@ function adaptUser(data) {
 }
 
 function adaptAllergen(data) {
+  const source = typeof data === "object" && data !== null ? data : {};
+  const allergen = adaptAllergenValue(data);
   return {
-    id: data.allergen_id ?? data.id,
-    code: data.code,
-    name: data.name ?? data.name_ko,
-    displayNumber: data.display_number,
-    description: data.description,
-    isActive: data.is_active,
+    id: source.allergen_id ?? source.id,
+    code: allergen.code,
+    name: allergen.name,
+    displayNumber: source.display_number,
+    description: source.description,
+    isActive: source.is_active,
   };
 }
 
@@ -580,7 +642,7 @@ function adaptMeal(data) {
       standardServingG: item.standard_serving_g,
       nutrition: adaptNutrition(item.nutrition_per_100g),
       ingredients: item.ingredients || [],
-      allergens: (item.allergens || []).map((allergen) => typeof allergen === "string" ? allergen : allergen.name),
+      allergens: (item.allergens || []).map(adaptAllergenValue),
     })),
   };
 }
@@ -740,11 +802,18 @@ function adaptMenu(data) {
     standardServingG: data.standard_serving_g,
     nutrition: adaptNutrition(nutrition),
     ingredients: data.ingredients || [],
-    allergens: (data.allergens || data.allergen_codes || []).map((value) => {
-      if (typeof value === "object") return { code: value.code, name: value.name ?? value.name_ko ?? value.code };
-      return { code: value, name: value };
-    }),
+    allergens: (data.allergens || data.allergen_codes || []).map(adaptAllergenValue),
     isActive: data.is_active,
+  };
+}
+
+function adaptAllergenValue(value) {
+  const source = typeof value === "object" && value !== null ? value : { code: value };
+  const code = String(source.code || source.name || "").trim();
+  const providedName = String(source.name ?? source.name_ko ?? "").trim();
+  return {
+    code,
+    name: providedName && providedName !== code ? providedName : ALLERGEN_NAMES[code] || providedName || code,
   };
 }
 

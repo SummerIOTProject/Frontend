@@ -4,17 +4,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/src/styles.css">
   <meta name="description" content="식사 통계 및 메뉴 관리">
   <title>관리자 | SafeMeal</title>
-  <script type="module" src="/src/pages/admin.js"></script>
 </head>
 
 <body data-page="admin" class="admin-body">
   <header class="topbar admin-topbar">
-    <a href="/admin.html" class="brand"><span class="brand-mark">잎</span><span><strong>세이프밀 관리자</strong><small>SAFE MEAL OPERATIONS</small></span></a>
+    <a href="/admin.html" class="brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32" focusable="false"><path d="M6 14.5h20c0 6.2-4.5 10.5-10 10.5S6 20.7 6 14.5Z"/><path d="M9.5 27h13M10.5 10.5c0-2 1.2-3.3 2.7-4.8M17 10.5c0-2.2 1.5-3.5 3.1-5.2M23 10.5c0-1.5.8-2.6 1.8-3.7"/></svg></span><span><strong>세이프밀 관리자</strong><small>SAFE MEAL OPERATIONS</small></span></a>
     <nav class="desktop-nav" aria-label="관리자 주요 메뉴">
       <a href="/dashboard.html">사용자 화면</a>
-      <a href="/admin.html" data-nav="admin">▤ 통계·메뉴 관리</a>
+      <a href="/menu.html">급식 메뉴</a>
+      <a href="/admin.html" data-nav="admin">통계·메뉴 관리</a>
     </nav>
     <div class="account"><span data-user-name></span><button type="button" data-logout>로그아웃</button></div>
   </header>
@@ -50,31 +51,49 @@
         <label class="field"><span>종료일</span><input name="endDate" type="date" required></label>
         <button type="submit" class="btn secondary">기간 조회</button>
       </form>
+      <div class="intake-legend" aria-label="평균 섭취율 그래프 색상 기준">
+        <span><i class="consumption-high"></i>80% 이상</span>
+        <span><i class="consumption-medium"></i>50~79%</span>
+        <span><i class="consumption-low"></i>50% 미만</span>
+      </div>
       <div class="table-scroll">
         <table class="admin-table">
           <thead><tr><th>메뉴</th><th>분석 횟수</th><th>평균 섭취율</th><th>평균 잔반율</th></tr></thead>
           <tbody id="menu-statistics"><tr><td colspan="4">불러오는 중...</td></tr></tbody>
         </table>
       </div>
+      <nav id="summary-pagination" class="pagination" aria-label="메뉴별 섭취·잔반 통계 페이지" aria-live="polite">
+        <button type="button" class="pagination-button" disabled>이전</button>
+        <span class="pagination-summary">페이지를 준비하고 있습니다.</span>
+        <button type="button" class="pagination-button" disabled>다음</button>
+      </nav>
     </section>
 
     <section class="panel admin-stat-panel meal-registration" aria-labelledby="meal-schedule-title">
       <div class="section-title">
         <div><small>MEAL SCHEDULE BUILDER</small><h2 id="meal-schedule-title">메뉴와 일자별 급식 식단 등록</h2></div>
-        <span>새 메뉴 생성과 점심 식단을 한 번에 등록</span>
+        <span>3단계로 간편하게 등록</span>
       </div>
       <form id="meal-schedule-form" class="menu-form" aria-describedby="meal-schedule-help">
-        <p id="meal-schedule-help" class="table-note">기존 메뉴를 선택하거나 새 메뉴를 작성해 식단에 추가한 뒤, 마지막 등록 버튼을 눌러 주세요.</p>
-        <div class="summary-filter">
-          <label class="field"><span>급식 일자</span><input id="meal-schedule-date" name="mealDate" type="date" required></label>
-          <label class="field"><span>식당·기관명</span><input id="meal-school-name" name="schoolName" required value="국민대학교" placeholder="예: 국민대학교"></label>
-          <label class="field"><span>식사 유형</span><input value="점심" readonly aria-readonly="true"></label>
-        </div>
-        <div class="meal-builder-grid">
-          <section class="meal-builder-card" aria-labelledby="existing-menu-title">
-            <div class="section-title compact-title">
-              <div><small>EXISTING MENU</small><h3 id="existing-menu-title">기존 메뉴 추가</h3></div>
+        <p id="meal-schedule-help" class="meal-registration-intro">급식 정보를 입력하고 메뉴를 담은 뒤 마지막 단계에서 한 번에 등록하세요.</p>
+        <div class="meal-registration-steps">
+          <section class="meal-registration-step" aria-labelledby="meal-info-step-title">
+            <header class="meal-step-heading">
+              <span class="meal-step-number">1</span>
+              <div><small>MEAL INFO</small><h3 id="meal-info-step-title">급식 정보</h3></div>
+            </header>
+            <div class="summary-filter">
+              <label class="field"><span>급식 일자</span><input id="meal-schedule-date" name="mealDate" type="date" required></label>
+              <label class="field"><span>식당·기관명</span><input id="meal-school-name" name="schoolName" required value="국민대학교" placeholder="예: 국민대학교"></label>
+              <label class="field"><span>식사 유형</span><input value="점심" readonly aria-readonly="true"></label>
             </div>
+          </section>
+
+          <section class="meal-registration-step" aria-labelledby="existing-menu-title">
+            <header class="meal-step-heading">
+              <span class="meal-step-number">2</span>
+              <div><small>ADD MENU</small><h3 id="existing-menu-title">메뉴 추가</h3></div>
+            </header>
             <div class="catalog-search">
               <label class="field" for="meal-menu-select">
                 <span>등록된 메뉴</span>
@@ -84,44 +103,50 @@
               </label>
               <button id="add-meal-menu" type="button" class="btn secondary" disabled>식단에 추가</button>
             </div>
+
+            <details id="new-menu-disclosure" class="new-menu-disclosure">
+              <summary><span><strong id="new-menu-item-title">새 메뉴 직접 등록</strong><small>영양·원재료·알레르기 정보를 입력합니다.</small></span><span class="disclosure-label" aria-hidden="true"></span></summary>
+              <fieldset class="new-menu-fields" aria-labelledby="new-menu-item-title">
+                <div class="new-menu-grid">
+                  <label class="field"><span>메뉴명</span><input id="draft-menu-name" name="draftMenuName" placeholder="예: 제육볶음" autocomplete="off"></label>
+                  <label class="field"><span>기준 배식량 (g)</span><input id="draft-standard-serving" name="draftStandardServingG" type="number" min="1" step="1" placeholder="120"></label>
+                </div>
+                <fieldset class="nutrition-fields">
+                  <legend>100g 기준 영양소</legend>
+                  <label class="field"><span>열량 (kcal)</span><input id="draft-calories" name="draftCaloriesKcal" type="number" min="0" step="0.01"></label>
+                  <label class="field"><span>탄수화물 (g)</span><input id="draft-carbohydrate" name="draftCarbohydrateG" type="number" min="0" step="0.01"></label>
+                  <label class="field"><span>단백질 (g)</span><input id="draft-protein" name="draftProteinG" type="number" min="0" step="0.01"></label>
+                  <label class="field"><span>지방 (g)</span><input id="draft-fat" name="draftFatG" type="number" min="0" step="0.01"></label>
+                </fieldset>
+                <label class="field"><span>원재료</span><textarea id="draft-ingredients" name="draftIngredients" rows="2" placeholder="돼지고기, 양파, 고추장, 간장"></textarea><small>쉼표 또는 줄바꿈으로 구분해 주세요.</small></label>
+                <fieldset class="allergen-fields">
+                  <legend>알레르기 태그</legend>
+                  <div id="draft-allergen-options"><span class="muted-text">목록을 불러오는 중입니다.</span></div>
+                </fieldset>
+                <button id="add-new-meal-menu" type="button" class="btn point">새 메뉴를 식단에 추가</button>
+                <p id="new-menu-draft-message" class="form-message" role="status" aria-live="polite"></p>
+              </fieldset>
+            </details>
           </section>
 
-          <fieldset class="meal-builder-card new-menu-fields" aria-labelledby="new-menu-item-title">
-            <legend class="section-title compact-title">
-              <span><small>NEW MENU</small><strong id="new-menu-item-title">새 메뉴 추가</strong></span>
-            </legend>
-            <div class="new-menu-grid">
-              <label class="field"><span>메뉴명</span><input id="draft-menu-name" name="draftMenuName" placeholder="예: 제육볶음" autocomplete="off"></label>
-              <label class="field"><span>기준 배식량 (g)</span><input id="draft-standard-serving" name="draftStandardServingG" type="number" min="1" step="1" placeholder="120"></label>
+          <section class="meal-registration-step" aria-labelledby="selected-menu-step-title">
+            <header class="meal-step-heading">
+              <span class="meal-step-number">3</span>
+              <div><small>REVIEW &amp; SUBMIT</small><h3 id="selected-menu-step-title">선택 메뉴 확인</h3></div>
+              <span id="selected-meal-menu-count" class="meal-step-count">0개</span>
+            </header>
+            <div class="table-scroll selected-menu-scroll">
+              <table class="admin-table compact-table">
+                <thead><tr><th>메뉴명</th><th>구분</th><th>기준량</th><th>관리</th></tr></thead>
+                <tbody id="selected-meal-menu-list"><tr><td colspan="4">기존 메뉴를 선택하거나 새 메뉴를 작성해 추가해 주세요.</td></tr></tbody>
+              </table>
             </div>
-            <fieldset class="nutrition-fields">
-              <legend>100g 기준 영양소</legend>
-              <label class="field"><span>열량 (kcal)</span><input id="draft-calories" name="draftCaloriesKcal" type="number" min="0" step="0.01"></label>
-              <label class="field"><span>탄수화물 (g)</span><input id="draft-carbohydrate" name="draftCarbohydrateG" type="number" min="0" step="0.01"></label>
-              <label class="field"><span>단백질 (g)</span><input id="draft-protein" name="draftProteinG" type="number" min="0" step="0.01"></label>
-              <label class="field"><span>지방 (g)</span><input id="draft-fat" name="draftFatG" type="number" min="0" step="0.01"></label>
-            </fieldset>
-            <label class="field"><span>원재료</span><textarea id="draft-ingredients" name="draftIngredients" rows="2" placeholder="돼지고기, 양파, 고추장, 간장"></textarea><small>쉼표 또는 줄바꿈으로 구분해 주세요.</small></label>
-            <fieldset class="allergen-fields">
-              <legend>알레르기 태그</legend>
-              <div id="draft-allergen-options"><span class="muted-text">목록을 불러오는 중입니다.</span></div>
-            </fieldset>
-            <button id="add-new-meal-menu" type="button" class="btn secondary">새 메뉴를 식단에 추가</button>
-            <p id="new-menu-draft-message" class="form-message" role="status" aria-live="polite"></p>
-          </fieldset>
+            <div class="meal-registration-actions">
+              <button id="meal-schedule-submit" type="submit" class="btn primary" disabled>메뉴 생성 및 해당 일자 식단 등록</button>
+              <p id="meal-schedule-message" class="form-message" role="status" aria-live="polite"></p>
+            </div>
+          </section>
         </div>
-        <div class="section-title">
-          <div><small>SELECTED ITEMS</small><h3>이번 식단에 등록할 메뉴</h3></div>
-          <span id="selected-meal-menu-count">0개</span>
-        </div>
-        <div class="table-scroll">
-          <table class="admin-table compact-table">
-            <thead><tr><th>메뉴명</th><th>구분</th><th>기준량</th><th>관리</th></tr></thead>
-            <tbody id="selected-meal-menu-list"><tr><td colspan="4">기존 메뉴를 선택하거나 새 메뉴를 작성해 추가해 주세요.</td></tr></tbody>
-          </table>
-        </div>
-        <button id="meal-schedule-submit" type="submit" class="btn primary" disabled>메뉴 생성 및 해당 일자 식단 등록</button>
-        <p id="meal-schedule-message" class="form-message" role="status" aria-live="polite"></p>
       </form>
     </section>
 
@@ -162,10 +187,16 @@
             <tbody id="admin-menu-list"><tr><td colspan="5">불러오는 중...</td></tr></tbody>
           </table>
         </div>
+        <nav id="menu-pagination" class="pagination" aria-label="등록 메뉴 페이지" aria-live="polite">
+          <button type="button" class="pagination-button" disabled>이전</button>
+          <span class="pagination-summary">페이지를 준비하고 있습니다.</span>
+          <button type="button" class="pagination-button" disabled>다음</button>
+        </nav>
       </section>
     </div>
   </main>
 
+  <script type="module" src="/src/pages/admin.js"></script>
 </body>
 
 </html>

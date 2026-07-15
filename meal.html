@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="식사 분석 상세 결과">
+  <title>식사 분석 | SafeMeal</title>
+  <script type="module" src="/src/pages/meal.js"></script>
+</head>
+
+<body data-page="meal">
+  <header class="topbar">
+    <a href="/dashboard.html" class="brand">
+      <span class="brand-mark">잎</span>
+      <span><strong>세이프밀</strong><small>SAFE MEAL</small></span>
+    </a>
+    <nav class="desktop-nav" aria-label="주요 메뉴">
+      <a href="/dashboard.html" data-nav="dashboard">▦ 대시보드</a>
+      <a href="/upload.html" data-nav="upload">↑ 업로드</a>
+      <a href="/history.html" data-nav="history">◷ 식사 기록</a>
+      <a href="/admin.html" data-nav="admin" data-admin-only hidden>▤ 관리자</a>
+    </nav>
+    <div class="account"><span data-user-name></span><button type="button" data-logout>로그아웃</button></div>
+  </header>
+
+  <main class="page">
+    <a href="/history.html" class="back">← 식사 기록</a>
+    <div id="meal-content" aria-live="polite">
+      <div class="state" role="status">
+        <span class="spinner"></span>
+        <strong>식사 기록을 확인하고 있습니다.</strong>
+      </div>
+    </div>
+  </main>
+
+  <nav class="mobile-nav" aria-label="모바일 주요 메뉴">
+    <a href="/dashboard.html" data-nav="dashboard">▦<span>대시보드</span></a>
+    <a href="/upload.html" data-nav="upload">↑<span>업로드</span></a>
+    <a href="/history.html" data-nav="history">◷<span>식사 기록</span></a>
+  </nav>
+</body>
+
+</html>

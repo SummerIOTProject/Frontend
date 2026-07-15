@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="최근 5일간 점심 메뉴와 식사 분석 기록">
+  <title>식사 기록 | SafeMeal</title>
+  <script type="module" src="/src/pages/history.js"></script>
+</head>
+
+<body data-page="history">
+  <header class="topbar">
+    <a href="/dashboard.html" class="brand">
+      <span class="brand-mark">잎</span>
+      <span><strong>세이프밀</strong><small>SAFE MEAL</small></span>
+    </a>
+    <nav class="desktop-nav" aria-label="주요 메뉴">
+      <a href="/dashboard.html" data-nav="dashboard">▦ 대시보드</a>
+      <a href="/upload.html" data-nav="upload">ⓘ 업로드</a>
+      <a href="/history.html" data-nav="history">◷ 식사 기록</a>
+      <a href="/admin.html" data-nav="admin" data-admin-only hidden>▤ 관리자</a>
+    </nav>
+    <div class="account"><span data-user-name></span><button type="button" data-logout>로그아웃</button></div>
+  </header>
+
+  <main class="page">
+    <header class="page-heading">
+      <span class="eyebrow">MEAL HISTORY</span>
+      <h1>식사 기록</h1>
+      <p>오늘을 포함한 최근 5일간 점심 메뉴와 분석 결과를 확인하세요.</p>
+    </header>
+
+    <div class="section-title my-4">
+      <div>
+        <small>LAST 5 DAYS · LUNCH</small>
+        <h2>최근 5일 점심 기록</h2>
+        <p id="history-period" class="table-note">조회 기간을 확인하고 있습니다.</p>
+      </div>
+      <span id="history-count">0건</span>
+    </div>
+    <div id="history-results" class="rows history-list" aria-live="polite"></div>
+  </main>
+
+  <nav class="mobile-nav" aria-label="모바일 주요 메뉴">
+    <a href="/dashboard.html" data-nav="dashboard">▦<span>대시보드</span></a>
+    <a href="/upload.html" data-nav="upload">ⓘ<span>업로드</span></a>
+    <a href="/history.html" data-nav="history">◷<span>식사 기록</span></a>
+  </nav>
+</body>
+
+</html>

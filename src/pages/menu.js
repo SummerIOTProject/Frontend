@@ -146,7 +146,7 @@ function renderDayCard(dateKey, meal) {
     ${menuItems.length
       ? `<p class="weekly-school-name">${escapeHtml(meal.schoolName || "제공 기관 미등록")}</p>
         <ul class="weekly-menu-items">${menuItems.map(renderMenuItem).join("")}</ul>`
-      : `<div class="weekly-day-empty"><strong>조회된 급식이 없습니다.</strong><span>현재 API에서 이 날짜의 메뉴를 제공하지 않습니다.</span></div>`}
+      : `<div class="weekly-day-empty"><strong>조회된 급식이 없습니다.</strong><span>아직 급식 메뉴가 등록되지 않았어요.</span></div>`}
   </article>`;
 }
 

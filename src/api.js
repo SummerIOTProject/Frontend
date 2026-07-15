@@ -454,19 +454,6 @@ export const api = {
     };
   },
 
-  async prepareMealRecordForUpload(mealId) {
-    apiLog("업로드 대상 식사 기록 준비", { mealId });
-    const recent = await this.getRecentMealRecords(1);
-    const record = recent.records.find((item) => String(item.mealId) === String(mealId));
-    if (!record) {
-      throw new ApiError("RFID 장치에서 오늘 식사 기록을 먼저 생성해 주세요.", {
-        status: 404,
-        code: "MEAL_RECORD_REQUIRED",
-      });
-    }
-    return record;
-  },
-
   async uploadMealImage(recordId, imageType, file, { signal, onProgress } = {}) {
     const normalizedType = String(imageType).toUpperCase();
     if (!["BEFORE", "AFTER"].includes(normalizedType)) {

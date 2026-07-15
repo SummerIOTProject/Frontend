@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => {
     plugins: [tailwindcss()],
     appType: "mpa",
     server: {
-      port: 5174,
+      port: 5173,
       proxy: backendOrigin ? {
         "/backend": {
           target: backendOrigin,
@@ -19,7 +19,7 @@ export default defineConfig(({ mode }) => {
         },
       } : {},
     },
-    preview: { port: 5174 },
+    preview: { port: 5173 },
     build: {
       emptyOutDir: true,
       rolldownOptions: {
@@ -33,6 +33,5 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
-    test: { environment: "jsdom" },
   };
 });

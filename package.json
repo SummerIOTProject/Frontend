@@ -8,16 +8,12 @@
   "scripts": {
     "dev": "vite --host localhost",
     "build": "vite build",
-    "preview": "vite preview --host localhost",
-    "test": "vitest run",
-    "test:watch": "vitest"
+    "preview": "vite preview --host localhost"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.2",
-    "jsdom": "^29.1.1",
     "tailwindcss": "4.3.2",
-    "vite": "^8.1.4",
-    "vitest": "^4.1.10"
+    "vite": "^8.1.4"
   },
   "type": "module",
   "dependencies": {

@@ -1,9 +1,8 @@
 # Dependencies
 node_modules/
 
-# Build output and test coverage
+# Build output
 dist/
-coverage/
 
 # Local environment configuration
 .env
@@ -22,7 +21,6 @@ pnpm-debug.log*
 
 # Tool caches
 .vite/
-.vitest/
 
 # Operating system files
 .DS_Store

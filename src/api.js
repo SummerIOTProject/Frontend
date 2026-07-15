@@ -36,7 +36,7 @@ export const endpoints = {
 };
 
 export const BACKEND_ORIGIN = (import.meta.env.VITE_BACKEND_ORIGIN?.trim() || "").replace(/\/$/, "");
-export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL?.trim() || "/backend").replace(/\/$/, "");
+export const API_BASE_URL = (import.meta.env.VITE_BACKEND_ORIGIN?.trim() || "/backend").replace(/\/$/, "");
 const baseUrl = API_BASE_URL;
 const AUTH_KEY = "smartMealAuth";
 const shouldLog = import.meta.env.MODE !== "test";
